@@ -174,6 +174,11 @@ send('/topic/chat', {msg: "Offline message"});
 
 ## ⚡ Middleware
 
+`stomp-react-hooks` supports powerful middleware hooks that let you transform, encrypt, log, or filter messages
+automatically.
+
+### ✨ Use Case Examples:
+
 ```ts
 import {useMiddleware} from "stomp-react-hooks";
 
@@ -186,6 +191,16 @@ useMiddleware.addOutbound((msg) => {
     console.debug("Sending:", msg);
     return msg;
 });
+```
+
+If you want to encrypt all messages with AES, you can create a setup like this:
+
+```ts
+// index.tsx
+import {setupEncryptionMiddleware} from "@/utils/encryptionMiddleware";
+
+// Set key from .env, auth, or props
+setupEncryptionMiddleware(env.SECRET_KEY);
 ```
 
 ---
