@@ -1,6 +1,6 @@
 {
   "name": "stomp-react-hooks",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A powerful React hook-based STOMP over WebSocket client with middleware, offline queue, and typed subscriptions.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,8 +27,8 @@
   "author": "Bros Chign",
   "license": "MIT",
   "peerDependencies": {
-    "@stomp/stompjs": "^6.1.0",
-    "react": "^17.0.0 || ^18.0.0"
+    "@stomp/stompjs": "^6.1.0 || ^7.0.0",
+    "react": "^17.0.0 || ^18.0.0 || || ^19.0.0 || ^20.0.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
