@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Client, IMessage, StompConfig, StompSubscription} from '@stomp/stompjs';
+import {Client, IMessage, StompConfig, StompHeaders, StompSubscription} from '@stomp/stompjs';
 import {eventBus} from '../utils/eventBus';
 import {parseMessage} from '../utils/stompHelpers';
 import {messageHistory} from '../utils/messageBuffer';
@@ -9,12 +9,13 @@ import {validateMessage} from '../utils/schemaValidator';
 import {flushOfflineQueue, storeOfflineMessage} from '../utils/offlineQueue';
 import {topicGuard} from '../utils/topicGuard';
 
-interface UseStompClientConfig extends StompConfig {
+interface UseStompClientConfig extends Omit<StompConfig, 'connectHeaders'> {
     namespace?: string;
     userRole?: string;
     userAttributes?: Record<string, any>;
     maxRetryAttempts?: number;
     enableDebug?: boolean;
+    connectHeaders?: StompHeaders | (() => Promise<StompHeaders>);
 }
 
 export function useStompClient(config: UseStompClientConfig) {
@@ -25,6 +26,17 @@ export function useStompClient(config: UseStompClientConfig) {
     const messageQueue: any[] = [];
     const maxRetry = config.maxRetryAttempts ?? 5;
 
+    const resolveTopic = (t: string) => `/${config.namespace ?? 'app'}/${t}`;
+
+    // Helper to resolve connectHeaders whether sync or async
+    const resolveConnectHeaders = async (): Promise<StompHeaders> => {
+        if (!config.connectHeaders) return {};
+        if (typeof config.connectHeaders === 'function') {
+            return await config.connectHeaders();
+        }
+        return config.connectHeaders;
+    };
+
     const reconnect = () => {
         if (retryAttempts.current >= maxRetry) return;
         const delay = Math.min(30000, Math.pow(2, retryAttempts.current) * 1000);
@@ -33,19 +45,12 @@ export function useStompClient(config: UseStompClientConfig) {
         setTimeout(() => client.current?.activate(), delay);
     };
 
-    const resolveTopic = (t: string) => `/${config.namespace || 'app'}/${t}`;
-
     useEffect(() => {
         let stompClient: Client;
 
-        const connectHeaders = async () => {
-            if (config.connectHeaders) return config.connectHeaders;
-            if (config.enableDebug) eventBus.emit('debug', 'Fetching JWT token for connectHeaders');
-            return {};
-        };
-
         const init = async () => {
-            const headers = await connectHeaders();
+            const headers = await resolveConnectHeaders();
+
             stompClient = new Client({
                 ...config,
                 connectHeaders: headers,
