@@ -1,22 +1,21 @@
-```markdown
 # stomp-react-hooks
 
 > An advanced React STOMP WebSocket client with powerful hooks, adaptive throttling, schema validation, session
-recovery, middleware support, and role-based access control.
+> recovery, middleware support, and role-based access control.
 
 ---
 
 ## 🌟 Features
 
-- ✅ **React Hook API**: `useStompClient`, `useStompTopics`, `useStompReplay`, `useStompStatus`
-- 🔄 **Adaptive Throttling**: Auto-optimizes message flow
-- 🔁 **Offline Queue**: Stores unsent messages when disconnected
-- 🔐 **Schema Validation**: Safe, typed messaging via JSON Schema
-- 🔑 **Role-Based Access Control**: Secure topic-level access
-- 🔧 **Middleware**: Modify inbound/outbound messages
-- 🧠 **Shared STOMP Context**: Easy access across your app
-- 🧲 **Event Bus**: Global connection/message listeners
-- ⚡ **Retry Logic**: Auto reconnect with exponential backoff
+- ✅ React Hook API**: `useStompClient`, `useStompTopics`, `useStompReplay`, `useStompStatus`
+- 🔄 Adaptive Throttling**: Auto-optimizes message flow
+- 🔁 Offline Queue**: Stores unsent messages when disconnected
+- 🔐 Schema Validation**: Safe, typed messaging via JSON Schema
+- 🔑 Role-Based Access Control**: Secure topic-level access
+- 🔧 Middleware**: Modify inbound/outbound messages
+- 🧠 Shared STOMP Context**: Easy access across your app
+- 🧲 Event Bus**: Global connection/message listeners
+- ⚡ Retry Logic**: Auto reconnect with exponential backoff
 
 ---
 
