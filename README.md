@@ -1,268 +1,273 @@
+```markdown
 # stomp-react-hooks
 
-> An advanced React STOMP WebSocket client with powerful hooks, adaptive throttling, schema validation, session recovery, and role-based authorization.
-
-[![npm version](https://img.shields.io/npm/v/stomp-react-hooks.svg)](https://www.npmjs.com/package/stomp-react-hooks)
-[![license](https://img.shields.io/npm/l/stomp-react-hooks.svg)](LICENSE)
-[![downloads](https://img.shields.io/npm/dw/stomp-react-hooks.svg)](https://www.npmjs.com/package/stomp-react-hooks)
+> An advanced React STOMP WebSocket client with powerful hooks, adaptive throttling, schema validation, session
+recovery, middleware support, and role-based access control.
 
 ---
 
-## Table of Contents
+## 🌟 Features
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-- [API Reference](#api-reference)
-- [Advanced Usage](#advanced-usage)
-- [Middleware & Extensibility](#middleware--extensibility)
-- [Session Management & Recovery](#session-management--recovery)
-- [Role-Based Access Control](#role-based-access-control)
-- [Adaptive Throttling](#adaptive-throttling)
-- [Schema Validation](#schema-validation)
-- [Offline Message Queue](#offline-message-queue)
-- [Event Bus & Debugging](#event-bus--debugging)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- ✅ **React Hook API**: `useStompClient`, `useStompTopics`, `useStompReplay`, `useStompStatus`
+- 🔄 **Adaptive Throttling**: Auto-optimizes message flow
+- 🔁 **Offline Queue**: Stores unsent messages when disconnected
+- 🔐 **Schema Validation**: Safe, typed messaging via JSON Schema
+- 🔑 **Role-Based Access Control**: Secure topic-level access
+- 🔧 **Middleware**: Modify inbound/outbound messages
+- 🧠 **Shared STOMP Context**: Easy access across your app
+- 🧲 **Event Bus**: Global connection/message listeners
+- ⚡ **Retry Logic**: Auto reconnect with exponential backoff
 
 ---
 
-## Introduction
-
-`stomp-react-hooks` is a cutting-edge React library designed to simplify real-time WebSocket communications using the STOMP protocol. It provides:
-
-- Easy React hooks for managing STOMP connections and topic subscriptions
-- Robust utilities for handling reconnection, offline messaging, and message buffering
-- Built-in schema validation and typed message support for safer data handling
-- Role and attribute-based topic authorization for secure messaging
-- Adaptive throttling to optimize performance based on network conditions
-- A middleware system for flexible message transformations and enhancements
-
----
-
-## Features
-
-### Powerful React Hooks
-
-- `useStompClient`: Create and manage a STOMP client with automatic reconnects and session resume.
-- `useStompTopics`: Subscribe to multiple topics easily and receive the latest messages.
-- `useStompReplay`: Replay the last received message from a topic.
-- `useStompStatus`: Monitor connection status in real time.
-- `useStompAuth`: Helper hook for async authentication token fetching.
-
-### Adaptive Throttling
-
-- Automatically adjusts message processing frequency based on network speed (using Network Information API) to prevent UI congestion and improve performance.
-
-### Session Management & Recovery
-
-- Persist subscription state and last processed messages in local storage to seamlessly resume subscriptions after disconnects or page reloads.
-
-### Typed & Schema-Validated Messaging
-
-- Register JSON schemas per topic for strict message validation using Ajv.
-- Blocks invalid messages and emits warnings to avoid runtime errors.
-
-### Role-Based Access Control (RBAC)
-
-- Define access policies with role and attribute conditions on topics.
-- Secure subscriptions so only authorized roles can subscribe or publish.
-
-### Offline Message Queueing
-
-- Buffer outgoing messages when offline and automatically flush them once reconnected to ensure message delivery reliability.
-
-### Middleware & Extensibility
-
-- Flexible middleware hooks allow transforming or filtering inbound and outbound messages, enabling features like encryption, compression, or logging.
-
-### Event Bus & Debugging
-
-- Global event bus for listening to connection events, errors, messages, and debug logs, perfect for monitoring or integrating with analytics.
-
----
-
-## Installation
+## 📦 Installation
 
 ```bash
 npm install stomp-react-hooks
-# or
-yarn add stomp-react-hooks
 ```
 
-Peer dependencies:
-
-- React 17+
-- @stomp/stompjs 6.1+
+> Peer dependencies: `react`, `@stomp/stompjs`
 
 ---
 
-## Getting Started
+## 🧪 Quick Start
 
 ```tsx
 import React from "react";
 import {
-  useStompClient,
-  useStompTopics,
-  registerSchema,
+    useStompClient,
+    useStompTopics,
+    registerSchema,
 } from "stomp-react-hooks";
 
-const CHAT_TOPIC = "/app/chat/messages";
+const TOPIC = "/app/chat/messages";
 
-// Register schema for chat messages
-registerSchema(CHAT_TOPIC, {
-  type: "object",
-  properties: {
-    id: { type: "string" },
-    user: { type: "string" },
-    text: { type: "string" },
-  },
-  required: ["id", "user", "text"],
+registerSchema(TOPIC, {
+    type: "object",
+    properties: {
+        id: {type: "string"},
+        user: {type: "string"},
+        text: {type: "string"}
+    },
+    required: ["id", "user", "text"]
 });
 
 function Chat() {
-  const { subscribeTyped, send, connected } = useStompClient({
-    brokerURL: "ws://localhost:8080/ws",
-    userRole: "user",
-    enableDebug: true,
-  });
-
-  const messages = useStompTopics([CHAT_TOPIC]);
-
-  React.useEffect(() => {
-    const subscription = subscribeTyped(CHAT_TOPIC, (msg) => {
-      console.log("Received message:", msg);
+    const {connected, send, subscribeTyped} = useStompClient({
+        brokerURL: "ws://localhost:8080/ws",
+        enableDebug: true,
+        userRole: "user"
     });
-    return () => subscription?.unsubscribe();
-  }, [subscribeTyped]);
 
-  const sendMessage = () => {
-    if (!connected) return;
-    send(CHAT_TOPIC, {
-      id: Date.now().toString(),
-      user: "user",
-      text: "Hello World!",
-    });
-  };
+    const messages = useStompTopics([TOPIC]);
 
-  return (
-    <div>
-      <button onClick={sendMessage} disabled={!connected}>
-        Send Message
-      </button>
-      <ul>
-        {messages[CHAT_TOPIC]?.map((msg) => (
-          <li key={msg.id}>
-            <strong>{msg.user}:</strong> {msg.text}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+    React.useEffect(() => {
+        const sub = subscribeTyped(TOPIC, (msg) => {
+            console.log("Received:", msg);
+        });
+        return () => sub?.unsubscribe();
+    }, []);
+
+    return (
+        <>
+            <button onClick={() => send(TOPIC, {
+                id: Date.now().toString(), user: "user", text: "Hello!"
+            })}>Send
+            </button>
+
+            <ul>
+                {messages[TOPIC]?.map(msg => (
+                    <li key={msg.id}><b>{msg.user}:</b> {msg.text}</li>
+                ))}
+            </ul>
+        </>
+    );
 }
 ```
 
 ---
 
-## API Reference
+## ⚙️ `useStompClient(config)`
 
-### `useStompClient(config)`
+Manages a STOMP connection and subscriptions.
 
-Manage STOMP connection and subscriptions.
+### Options:
 
-- `brokerURL` (string): WebSocket endpoint URL.
-- `namespace` (string, optional): Topic namespace prefix (default: `'app'`).
-- `userRole` (string, optional): User role for topic permission checks.
-- `userAttributes` (object, optional): Attributes for fine-grained access control.
-- `maxRetryAttempts` (number, optional): Max reconnect attempts (default: 5).
-- `enableDebug` (boolean, optional): Enable debug logging.
+```ts
+{
+    brokerURL: string;
+    namespace ? : string;
+    connectHeaders ? : Record<string, string> | (() => Promise<Record<string, string>>);
+    userRole ? : string;
+    userAttributes ? : Record<string, any>;
+    enableDebug ? : boolean;
+    maxRetryAttempts ? : number;
+}
+```
 
-Returns:
+### Returns:
 
-- `client`: STOMP client instance.
-- `connected`: Boolean connection status.
-- `subscribeTyped(topic, handler, timeoutMs?)`: Typed and schema-validated subscription method.
-- `send(topic, message, headers?)`: Send messages.
-- `reconnect()`: Manual reconnect trigger.
-
-### `subscribeTyped<T>(topic, handler, timeoutMs?)`
-
-Subscribe with typed payload validation.
-
-- `topic`: STOMP destination.
-- `handler`: Callback receiving typed message.
-- `timeoutMs`: Optional auto-unsubscribe timer in ms.
-
-Returns: Subscription object with `.unsubscribe()`.
+- `client`: The STOMP client
+- `connected`: Connection status
+- `send(destination, body, headers?)`
+- `subscribeTyped<T>(destination, handler, timeoutMs?)`
+- `reconnect()`
 
 ---
 
-## Advanced Usage
+## 🧠 Shared Context Setup
 
-### Middleware
+```tsx
+import {StompProvider, useStomp} from "stomp-react-hooks/context/StompContext";
 
-Register middleware to transform messages:
+export function App() {
+    return (
+        <StompProvider config={{brokerURL: "ws://localhost:8080/ws"}}>
+            <Chat/>
+        </StompProvider>
+    );
+}
+
+function Chat() {
+    const {subscribeTyped, send} = useStomp();
+    // ...
+}
+```
+
+---
+
+## 🔐 Auth Header Usage
+
+### Static Headers:
 
 ```ts
-import { useMiddleware } from "stomp-react-hooks";
+useStompClient({
+    brokerURL: "ws://...",
+    connectHeaders: {
+        Authorization: "Bearer yourToken"
+    }
+});
+```
+
+### Dynamic (Async) Headers:
+
+```ts
+useStompClient({
+    brokerURL: "ws://...",
+    connectHeaders: async () => {
+        const token = await fetch('/auth/token');
+        return {Authorization: `Bearer ${token}`};
+    }
+});
+```
+
+---
+
+## 🔄 Offline Support
+
+Messages sent while disconnected are buffered and auto-flushed after reconnect:
+
+```ts
+send('/topic/chat', {msg: "Offline message"});
+```
+
+---
+
+## ⚡ Middleware
+
+```ts
+import {useMiddleware} from "stomp-react-hooks";
 
 useMiddleware.addInbound((msg) => {
-  // decrypt or modify incoming msg
-  return msg;
+    msg.receivedAt = Date.now();
+    return msg;
 });
 
 useMiddleware.addOutbound((msg) => {
-  // encrypt or log outgoing msg
-  return msg;
+    console.debug("Sending:", msg);
+    return msg;
 });
 ```
 
-### Session Management
-
-The client automatically persists subscriptions and last message IDs. You can also manually save/load session with utility functions in `src/utils/sessionRecovery.ts`.
-
-### Permissions
-
-Define policies in `topicGuard` util or provide your own dynamic policy system for fine control over who can subscribe/publish to topics.
-
 ---
 
-## Offline Support
-
-Messages sent while disconnected are buffered and automatically sent when the connection is restored, ensuring no message loss.
-
----
-
-## Event Bus
-
-Listen for global events:
+## 📊 Event Bus
 
 ```ts
-import { eventBus } from "stomp-react-hooks";
+import {eventBus} from "stomp-react-hooks";
 
-eventBus.on("connected", () => console.log("Connected!"));
-eventBus.on("disconnected", () => console.log("Disconnected!"));
-eventBus.on("message", (msg) => console.log("Message received:", msg));
-eventBus.on("debug", (log) => console.debug("Debug:", log));
-eventBus.on("error", (err) => console.error("Error:", err));
+eventBus.on("connected", () => console.log("CONNECTED"));
+eventBus.on("message", (msg) => console.log("MSG", msg));
+eventBus.on("error", (err) => console.error("ERR", err));
 ```
 
 ---
 
-## Contributing
+## 📚 API Summary
 
-Contributions are welcome! Please open issues and submit PRs on [GitHub](https://github.com/jingx157/stomp-react-hooks).
+| Hook               | Purpose                           |
+|--------------------|-----------------------------------|
+| `useStompClient()` | Connect, send, subscribe          |
+| `useStompTopics()` | Store and retrieve topic messages |
+| `useStompStatus()` | Reactively watch connection       |
+| `useStompReplay()` | Replay last message               |
+| `useMiddleware`    | Register transformers             |
+| `registerSchema()` | Register JSON schema for topic    |
 
 ---
 
-## License
+## 💼 Role-Based Access
 
-MIT © Jingx
+Pass your user's role and optional attributes:
+
+```ts
+useStompClient({
+    userRole: "admin",
+    userAttributes: {team: "engineering"}
+});
+```
 
 ---
 
-## Contact
+## 🛠 Project Structure
 
-For support or questions, open an issue or contact [chingc035@gmail.com].
+```text
+src/
+├── hooks/
+│   └── useStompClient.ts
+│   └── useStompTopics.ts
+│   └── ...
+├── context/
+│   └── StompContext.tsx
+├── utils/
+│   └── middleware.ts
+│   └── offlineQueue.ts
+│   └── ...
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome PRs and issues! Fork this repo and run:
+
+```bash
+npm install
+npm run build
+```
+
+---
+
+## 📄 License
+
+MIT © Bros Chign (https://github.com/jingx157)
+
+---
+
+## 📬 Contact
+
+For support or questions:  
+📧 chingc035@gmail.com  
+💬 GitHub Issues: https://github.com/jingx157/stomp-react-hooks/issues
+
+```

@@ -1,6 +1,6 @@
 {
   "name": "stomp-react-hooks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A powerful React hook-based STOMP over WebSocket client with middleware, offline queue, and typed subscriptions.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
