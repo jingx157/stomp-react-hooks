@@ -136,7 +136,7 @@ export function useStompClient(config: UseStompClientConfig) {
         }
     }, [connected]);
 
-    return {client: client.current, connected, subscribeTyped, send, reconnect};
+    return {client: client.current, connected, subscribeTyped, send, reconnect, subscribe};
 }
 
 export type {UseStompClientConfig as UseStompClientOptions};
