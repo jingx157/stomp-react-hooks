@@ -166,23 +166,6 @@ subscribeTyped<{ id: string; type: string }>("topic/one-dice:123", (data) => {
 
 ---
 
-### 🔁 `unsubscribeAll()`
-
-Unsubscribes from all active topics. Useful when the user logs out or a `401` occurs.
-
-```ts
-const {unsubscribeAll} = useStomp();
-
-axios.interceptors.response.use(
-    res => res,
-    err => {
-        if (err?.response?.status === 401) {
-            unsubscribeAll();
-        }
-        return Promise.reject(err);
-    }
-);
-```
 
 > ✅ Ensures clean disconnection when auth expires or the app resets.
 

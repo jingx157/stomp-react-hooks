@@ -127,13 +127,6 @@ export function useStompClient(config: UseStompClientConfig) {
         }
     };
 
-    const unsubscribeAll = () => {
-        Object.values(activeSubscriptions.current).forEach((sub) => {
-            sub.unsubscribe();
-        });
-        activeSubscriptions.current = {};
-    };
-
     useEffect(() => {
         if (connected) {
             while (messageQueue.length > 0) {
@@ -143,7 +136,7 @@ export function useStompClient(config: UseStompClientConfig) {
         }
     }, [connected]);
 
-    return {client: client.current, connected, subscribeTyped, send, reconnect, subscribe, unsubscribeAll};
+    return {client: client.current, connected, subscribeTyped, send, reconnect, subscribe};
 }
 
 export type {UseStompClientConfig as UseStompClientOptions};

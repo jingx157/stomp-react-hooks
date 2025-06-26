@@ -1,4 +1,5 @@
 export * from './hooks/useStompClient';
+export * from './context/StompContext';
 export * from './hooks/useStompTopics';
 export * from './hooks/useStompReplay';
 export * from './hooks/useStompStatus';
