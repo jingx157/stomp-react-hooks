@@ -110,6 +110,7 @@ Manages a STOMP connection and subscriptions.
 - `connected`: Connection status
 - `send(destination, body, headers?)`
 - `subscribeTyped<T>(destination, handler, timeoutMs?)`
+- `subscribe(destination, handler)`
 - `reconnect()`
 
 ---
@@ -132,6 +133,60 @@ function Chat() {
     // ...
 }
 ```
+
+---
+
+### 🔔 `subscribe(destination, handler)`
+
+Basic topic subscription without schema validation or parsing.
+
+```tsx
+const {subscribe} = useStomp();
+
+subscribe("topic/my-raw-event", (msg) => {
+    console.log("Raw STOMP message:", msg.body);
+});
+```
+
+---
+
+### 📦 `subscribeTyped<T>(destination, handler, timeoutMs?)`
+
+Typed topic subscription with middleware + schema validation.
+
+```tsx
+const {subscribeTyped} = useStomp();
+
+subscribeTyped<{ id: string; type: string }>("topic/one-dice:123", (data) => {
+    console.log("Validated and typed payload:", data);
+});
+```
+
+> ✅ Automatically applies middleware and schema validation if registered.
+
+---
+
+### 🔁 `unsubscribeAll()`
+
+Unsubscribes from all active topics. Useful when the user logs out or a `401` occurs.
+
+```ts
+const {unsubscribeAll} = useStomp();
+
+axios.interceptors.response.use(
+    res => res,
+    err => {
+        if (err?.response?.status === 401) {
+            unsubscribeAll();
+        }
+        return Promise.reject(err);
+    }
+);
+```
+
+> ✅ Ensures clean disconnection when auth expires or the app resets.
+
+---
 
 ---
 
