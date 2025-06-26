@@ -26,7 +26,7 @@ export function useStompClient(config: UseStompClientConfig) {
     const messageQueue: any[] = [];
     const maxRetry = config.maxRetryAttempts ?? 5;
 
-    const resolveTopic = (t: string) => `/${config.namespace ?? 'app'}/${t}`;
+    const resolveTopic = (t: string) => config.namespace ? `/${config.namespace}/${t}` : `/${t}`;
 
     // Helper to resolve connectHeaders whether sync or async
     const resolveConnectHeaders = async (): Promise<StompHeaders> => {
