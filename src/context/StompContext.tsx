@@ -2,7 +2,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useStompClient, UseStompClientOptions, UseStompClientReturn } from '../hooks/useStompClient';
 
-const StompContext = createContext<UseStompClientReturn | null>(null);
+export const StompContext = createContext<UseStompClientReturn | null>(null);
 
 interface StompProviderProps {
   children: ReactNode;

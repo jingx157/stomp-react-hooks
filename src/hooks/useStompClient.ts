@@ -23,7 +23,7 @@ export function useStompClient(config: UseStompClientConfig) {
     const [connected, setConnected] = useState(false);
     const activeSubscriptions = useRef<Record<string, StompSubscription & { callback: (data: any) => void }>>({});
     const retryAttempts = useRef(0);
-    const messageQueue: any[] = [];
+    const messageQueue = useRef<any[]>([]);
     const maxRetry = config.maxRetryAttempts ?? 5;
 
     const resolveTopic = (t: string) => config.namespace ? `/${config.namespace}/${t}` : `/${t}`;
@@ -123,15 +123,17 @@ export function useStompClient(config: UseStompClientConfig) {
             client.current.publish({destination: fullDest, body: JSON.stringify(processed), headers});
         } else {
             storeOfflineMessage({destination: fullDest, body: JSON.stringify(processed), headers});
-            messageQueue.push({destination: fullDest, body: JSON.stringify(processed), headers});
+            messageQueue.current.push({destination: fullDest, body: JSON.stringify(processed), headers});
         }
     };
 
     useEffect(() => {
         if (connected) {
-            while (messageQueue.length > 0) {
-                const msg = messageQueue.shift();
-                client.current?.publish(msg);
+            while (messageQueue.current.length > 0) {
+                const msg = messageQueue.current.shift();
+                if (msg) {
+                    client.current?.publish(msg);
+                }
             }
         }
     }, [connected]);
