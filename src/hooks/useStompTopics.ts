@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useStompClient } from './useStompClient';
+import { useStomp } from '../context/StompContext';
 
 export function useStompTopics<T extends Record<string, any>>(topics: string[]) {
-  const { subscribeTyped } = useStompClient({ brokerURL: '', namespace: 'app' });
+  const { subscribeTyped } = useStomp();
   const [messages, setMessages] = useState<Partial<T>>({});
 
   useEffect(() => {

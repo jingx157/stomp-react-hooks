@@ -1,4 +1,5 @@
 import React from 'react';
+import { StompContext } from '../context/StompContext';
 
 export const MockStompProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const mockClient = {
@@ -12,7 +13,9 @@ export const MockStompProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     connected: true,
     subscribeTyped: () => {},
     send: () => {},
-  };
+    reconnect: () => {},
+    subscribe: () => ({ unsubscribe: () => {} }),
+  } as any;
 
-  return <>{children}</>;
+  return <StompContext.Provider value={context}>{children}</StompContext.Provider>;
 };
